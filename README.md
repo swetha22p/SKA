@@ -268,6 +268,4 @@ Python 3.8 or higher is recommended.
 
 ---
 
-## Citation
 
-If you use this repository in your research, please cite accordingly.
