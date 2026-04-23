@@ -1,8 +1,8 @@
 # SanskritUSR-NLG: Natural Language Generation from Sanskrit USR
 
-This repository contains scripts and related research materials for generating
+This repository contains scripts to generate
 natural language paragraphs (English and Hindi) from Sanskrit USR (Universal Semantic
-Representation) inputs, with an optional intermediate JSON conversion step.
+Representation) inputs, with an intermediate JSON conversion step.
 
 ---
 
@@ -30,7 +30,7 @@ There are **two workflows** depending on your input format:
 
 ```
 ┌─────────────────────────────────────────────────────────┐
-│  Input: USR file (.txt / .usr)                          │
+│  Input: USR file (.txt)                          │
 │                                                         │
 │  Option A (USR → JSON → NLG):                           │
 │    USR  ──[json_formatter.py]──►  JSON                  │
@@ -45,13 +45,7 @@ There are **two workflows** depending on your input format:
 └─────────────────────────────────────────────────────────┘
 ```
 
-**Use Option A** when you want an intermediate JSON representation (e.g., for
-downstream processing, visualization, or corpus storage).
 
-**Use Option B** when you want to go directly from raw USR text to a paragraph
-without creating any intermediate files.
-
----
 
 ## API Key Setup
 
