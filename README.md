@@ -16,22 +16,17 @@ SKA/
 │
 ├── InputDataSanskrit/
 │   │
-│   ├── USR/
-│   │   └── Raw Sanskrit USR input files
+│   ├── USR  #Raw Sanskrit USR input files
 │   │
-│   ├── JSON/
-│   │   └── JSON files converted from USR
+│   ├── JSON #JSON files converted from USR
 │   │
-│   └── usr_error_logs/
-│       └── USR formatting and conversion error logs
+│   └── usr_error_logs #USR formatting and conversion error logs
 │
 ├── SanskritGeneratedOutputs/
 │   │
-│   ├── Gemini-2.5-Flash_USR/
-│   │   └── Paragraphs generated directly from USR input
+│   ├── Gemini-2.5-Flash_USR  #Paragraphs generated directly from USR input
 │   │
-│   └── Gemini-2.5-Flash_JSON/
-│       └── Paragraphs generated from JSON input
+│   └── Gemini-2.5-Flash_JSON #Paragraphs generated from JSON input
 │
 ├── Scripts/
 │   │
