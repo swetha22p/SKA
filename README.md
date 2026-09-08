@@ -1,4 +1,4 @@
-# SanskritUSR-NLG: Natural Language Generation from Sanskrit USR
+# USR-NLG: Natural Language Generation from USR
 
 This repository contains scripts for generating natural language paragraphs from Sanskrit **USR (Universal Semantic Representation)** inputs using two approaches:
 
