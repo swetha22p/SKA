@@ -370,19 +370,7 @@ SanskritGeneratedOutputs/Gemini-2.5-Flash_JSON/
 
 ---
 
-# Final Output Naming Convention
 
-The recommended naming convention is:
-
-```text
-SanskritGeneratedOutputs/
-│
-├── Gemini-2.5-Flash_USR/
-│
-└── Gemini-2.5-Flash_JSON/
-```
-
-This clearly identifies:
 
 | Output Folder           | Input Representation | Model            |
 | ----------------------- | -------------------- | ---------------- |
