@@ -23,10 +23,14 @@ except ImportError:
     print("Warning: google.generativeai not available. Install with: pip install google-generativeai")
 
 # Configuration
-API_KEY = "API_KEY"
-MODEL_NAME = "gemini-2.5-flash"
-BATCH_CHAR_LIMIT = 30000
-NUM_FEW_SHOT_EXAMPLES = 2
+# Read API key from environment variable for safety
+API_KEY = os.environ.get("GEMINI_API_KEY", "")
+# Allow overriding model and batch size via environment for flexibility
+MODEL_NAME = os.environ.get("GEMINI_MODEL", "gemini-2.5-flash")
+try:
+    BATCH_CHAR_LIMIT = int(os.environ.get("BATCH_CHAR_LIMIT", "30000"))
+except ValueError:
+    BATCH_CHAR_LIMIT = 30000
 
 # Language-specific prompts for paragraph generation from Sanskrit JSON
 LANGUAGE_PROMPTS = {
@@ -98,12 +102,16 @@ def wait_for_rate_limit():
             time.sleep(sleep_time)
         request_times.popleft()
 
-def call_gemini_api_batch(api_input_text, api_key, language="hindi", max_retries=3):
+def call_gemini_api_batch(api_input_text, api_key=None, language="hindi", max_retries=3):
     """Makes a single, batched call to the Gemini API with smart quota handling."""
     if genai is None:
         raise RuntimeError("google.generativeai not available")
+    # Ensure we have an API key from argument or environment
+    effective_key = api_key or API_KEY
+    if not effective_key:
+        raise RuntimeError("Missing Gemini API key. Set GEMINI_API_KEY environment variable.")
 
-    genai.configure(api_key=api_key or API_KEY)
+    genai.configure(api_key=effective_key)
     model = genai.GenerativeModel(MODEL_NAME)
 
     for attempt in range(max_retries):
@@ -182,19 +190,9 @@ def parse_json_file(file_path: str) -> List[Dict[str, Any]]:
     items.sort(key=lambda x: x['id'])
     return items
 
-def create_paragraph_prompt(language: str, items: List[Dict[str, Any]], few_shot_examples: List[Dict[str, Any]] = None) -> str:
+def create_paragraph_prompt(language: str, items: List[Dict[str, Any]]) -> str:
     """Create a prompt for paragraph generation from Sanskrit JSON."""
     prompt = LANGUAGE_PROMPTS[language] + "\n\n"
-    
-    # Add few-shot examples if available
-    if few_shot_examples:
-        prompt += "Examples:\n"
-        for i, example in enumerate(few_shot_examples, 1):
-            prompt += f"Example {i}:\n"
-            for item in example['items']:
-                prompt += f"{item['api_content']}\n"
-            prompt += f"Generated Paragraph: [masked]\n\n"
-        prompt += "--- GENERATE ---\n\n"
     
     # Add target items with more specific instructions
     prompt += f"CRITICAL: Generate a complete paragraph from the following {len(items)} input JSON structures. "
@@ -233,7 +231,7 @@ def wrap_text(text: str, width: int = 80) -> str:
     import textwrap
     return textwrap.fill(text, width=width, break_long_words=False, break_on_hyphens=False)
 
-def process_file(input_file: str, output_file: str, language: str, mode: str = "zero_shot", train_file: str = None) -> None:
+def process_file(input_file: str, output_file: str, language: str) -> None:
     """Process Sanskrit JSON file and generate paragraph output in safe batches."""
     print(f"Processing {input_file} for paragraph generation...")
 
@@ -245,19 +243,7 @@ def process_file(input_file: str, output_file: str, language: str, mode: str = "
 
     print(f"  - Found {len(items)} structures to combine into paragraph")
 
-    # Prepare few-shot examples if needed
-    few_shot = None
-    if mode == "few_shot" and train_file and os.path.exists(train_file):
-        train_items = parse_json_file(train_file)
-        if len(train_items) >= 3:
-            import random
-            num_example_items = min(random.randint(3, 5), len(train_items))
-            example_items = random.sample(train_items, num_example_items)
-            example_items.sort(key=lambda x: x['id'])
-            few_shot = [{'items': example_items}]
-            print(f"  - Using {len(example_items)} few-shot example items")
-        else:
-            print("  - Not enough train examples; falling back to zero-shot")
+    # Only zero-shot is supported: no few-shot examples will be used
 
     # Split into batches based on character size
     current_batch = []
@@ -270,12 +256,12 @@ def process_file(input_file: str, output_file: str, language: str, mode: str = "
         if batch_char_count + len(item_str) > BATCH_CHAR_LIMIT:
             # Process current batch
             print(f"  - Processing batch {batch_id} with {len(current_batch)} structures...")
-            prompt = create_paragraph_prompt(language, current_batch, few_shot)
+            prompt = create_paragraph_prompt(language, current_batch)
             response_text = call_gemini_api_batch(prompt, None, language)
             paragraphs.append(response_text.strip() if response_text else "[NO RESPONSE]")
 
             # Sleep to respect quota
-            print("  - Waiting 30 seconds before next batch...")
+            print("  - Waiting 60 seconds before next batch...")
             time.sleep(60)
 
             # Reset for next batch
@@ -289,7 +275,7 @@ def process_file(input_file: str, output_file: str, language: str, mode: str = "
     # Process remaining batch
     if current_batch:
         print(f"  - Processing batch {batch_id} with {len(current_batch)} structures...")
-        prompt = create_paragraph_prompt(language, current_batch, few_shot)
+        prompt = create_paragraph_prompt(language, current_batch)
         response_text = call_gemini_api_batch(prompt, None, language)
         paragraphs.append(response_text.strip() if response_text else "[NO RESPONSE]")
 
@@ -307,32 +293,6 @@ def process_file(input_file: str, output_file: str, language: str, mode: str = "
 
     print(f"  - Combined {len(paragraphs)} batches into final paragraph in {output_file}")
 
-
-# def main():
-#     parser = argparse.ArgumentParser(description="Sanskrit-JSON-Paragraph-NLG Inference Script")
-#     parser.add_argument("input_file", help="Input Sanskrit JSON file path")
-#     parser.add_argument("-o", "--output", help="Output file path")
-#     parser.add_argument("-l", "--language", default="english", 
-#                        choices=["english", "hindi"],
-#                        help="Target language (default: english)")
-#     parser.add_argument("-m", "--mode", default="zero_shot",
-#                        choices=["zero_shot", "few_shot"],
-#                        help="Inference mode (default: zero_shot)")
-    
-#     args = parser.parse_args()
-    
-#     if not os.path.exists(args.input_file):
-#         print(f"Error: Input file {args.input_file} does not exist")
-#         return
-    
-#     if not args.output:
-#         base_name = os.path.splitext(os.path.basename(args.input_file))[0]
-#         args.output = f"{base_name}_{args.language}_sanskrit_gemini_json.txt"
-    
-#     process_file(args.input_file, args.output, args.language, args.mode)
-
-# if __name__ == "__main__":
-#     main()
 def main():
     import glob
     parser = argparse.ArgumentParser(description="Sanskrit-JSON-Paragraph-NLG Inference Script")
@@ -342,9 +302,7 @@ def main():
     parser.add_argument("-l", "--language", default="english",
                        choices=["english", "hindi"],
                        help="Target language (default: english)")
-    parser.add_argument("-m", "--mode", default="zero_shot",
-                       choices=["zero_shot", "few_shot"],
-                       help="Inference mode (default: zero_shot)")
+    # Only zero-shot mode is supported
 
     args = parser.parse_args()
     json_folder = args.json_folder
@@ -363,12 +321,9 @@ def main():
     for f in all_files:
         print("  -", f)
 
-    # Filter for prefix match
-    json_files = [
-        f for f in all_files
-        if f.startswith("test3_json") and f.endswith(".json")
-    ]
-    print(f"\n🎯 Matched {len(json_files)} files starting with '01_nov_25':")
+    # Process all JSON files in the folder
+    json_files = [f for f in all_files if f.endswith(".json")]
+    print(f"\n🎯 Matched {len(json_files)} JSON files:")
     for f in json_files:
         print("  ✅", f)
 
@@ -386,7 +341,7 @@ def main():
         print(f"   → Output: {output_path}")
 
         try:
-            process_file(input_path, output_path, args.language, args.mode)
+            process_file(input_path, output_path, args.language)
             if os.path.exists(output_path):
                 print(f"✅ File created: {output_path}")
             else:

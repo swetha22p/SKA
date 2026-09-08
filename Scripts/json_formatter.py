@@ -1,5 +1,6 @@
 import json
 import os
+import argparse
 from pathlib import PurePath
 from wxconv import WXC
 
@@ -486,16 +487,20 @@ class JsonFormatter:
             print(f"\nProcessed {filename} and saved to {output_file_path}")
 
 if __name__ == "__main__":
-    # input_folder = r"InputDataSanskrit/usr"
-    # output_folder = r"InputDataSanskrit/json"
-    input_folder = r"bhagvatgeeta_input"
-    output_folder = r"error_checking/json"
-    log_folder = r"error_checking/usr_error_logs"
+    parser = argparse.ArgumentParser(description="Convert USR files to JSON graphs")
+    parser.add_argument("--input-folder", "-i", default="bhagvatgeeta_input",
+                        help="Path to the input folder containing .txt USR files")
+    parser.add_argument("--output-folder", "-o", default="error_checking/json",
+                        help="Path to the output folder for JSON files")
+    parser.add_argument("--log-folder", "-l", default="error_checking/usr_error_logs",
+                        help="Path to the folder where error logs will be written")
+
+    args = parser.parse_args()
 
     json_formatter = JsonFormatter(
-        input_folder=input_folder,
-        output_folder=output_folder,
-        log_folder=log_folder
+        input_folder=args.input_folder,
+        output_folder=args.output_folder,
+        log_folder=args.log_folder
     )
 
     json_formatter.process()

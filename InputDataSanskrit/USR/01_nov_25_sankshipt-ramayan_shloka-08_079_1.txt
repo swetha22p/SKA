@@ -1,0 +1,21 @@
+<sent_id=08_079_1>
+##ततः सुग्रीव-सहितः गत्वा तीरम् महा-उदधेः समुद्रम् क्षोभयामास शरैः आदित्य-सन्निभैः (रामः) .
+sugrIva	1	male	-	-	-	-	-	16:begin
+sahiwa_1	2	-	-	-	-	-	-	3:head
+[3-tat_1]	3	-	-	17:mod	-	-	-	-
+gam_1	4	-	-	10:rpk	-	-	-	-
+wIra_1	5	-	-	4:k2	-	-	-	-
+mahaw_1	6	-	-	-	-	-	-	8:mod
+uxaXi_1	7	-	-	-	-	-	-	8:head
+[karmaXAraya_1]	8	-	-	5:r6	-	-	-	-
+samuxra_1	9	-	-	10:k2	-	-	-	-
+kRuB_1-a_1	10	-	causative	0:main	-	wawaH_1	-	-
+Sara_1	11	-	pl	10:k3	-	-	-	-
+Axiwya_1	12	-	-	-	-	-	-	14:component1
+sanniBa_1	13	-	pl	-	-	-	-	14:component2
+[bahu_1]	14	-	-	11:mod	-	-	-	-
+rAma	15	male	-	-	-	-	-	17:begin
+[ne_1]	16	per	-	-	-	-	-	3:mod
+[ne_2]	17	per	-	10:k1	-	-	-	-
+%affirmative
+</sent_id>

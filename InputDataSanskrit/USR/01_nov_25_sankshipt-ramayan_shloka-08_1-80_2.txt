@@ -1,0 +1,22 @@
+<sent_id=08_080_1>
+##दर्शयामास च आत्मानम् समुद्रः सरिताम् पतिः .
+xqS_1-a_1	1	-	causative	0:main	-	ca_1	-	-
+Awman_1	2	-	-	1:k2	-	-	-	-
+samuxra_1	3	-	-	1:pk1	-	-	-	-
+sariw_1	4	-	pl	5:r6	-	-	-	-
+pawi_1	5	-	-	3:mod	-	-	-	-
+%affirmative
+</sent_id>
+<sent_id=09_080_2>
+##(रामः) समुद्र-वचनात् च एव नलम् सेतुम् अकारयत् .
+rAma	1	male	-	-	-	-	-	8:begin
+samuxra_1	2	-	-	-	-	-	-	4:mod
+vacana_1	3	-	-	-	-	-	-	4:head
+[6-tat_1]	4	-	-	7:rh	-	-	-	-
+nala	5	male	-	-	-	-	-	9:begin
+sewu_1	6	-	-	7:k2	-	-	-	-
+kq_1-aw_1	7	-	causative	0:main	-	-	-	-
+[ne_1]	8	per	-	7:pk1	-	-	-	-
+[ne_2]	9	per	-	7:jk1	-	-	-	-
+%affirmative
+</sent_id>
