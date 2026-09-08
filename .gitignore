@@ -21,15 +21,7 @@ pip-wheel-metadata/
 .DS_Store
 .vscode/
 .idea/
-Outputs/
-SanskritGeneratedOutputs/
-SanskritGeneratedOutputs/*
-InputDataSanskrit/JSON/
-InputDataSanskrit/usr_error_logs/
-error_checking/
-output/
-output_usr/
-usr_error_logs/
+
 Scripts/__pycache__/
 *.bak
 *.swp

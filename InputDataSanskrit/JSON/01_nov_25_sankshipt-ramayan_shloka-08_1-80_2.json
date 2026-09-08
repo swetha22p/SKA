@@ -1,0 +1,169 @@
+[
+    {
+        "text": "दर्शयामास च आत्मानम् समुद्रः सरिताम् पतिः .",
+        "usr_id": "08_080_1",
+        "SENT_TYPE": "affirmative",
+        "nodes": [
+            {
+                "index": 1,
+                "concept": "दृश्_1",
+                "properties": {
+                    "tam": "अ_1",
+                    "is_combined_tam": true,
+                    "attr_causative": "causative",
+                    "speaker_view": "ca_1",
+                    "is_root": true
+                }
+            },
+            {
+                "index": 2,
+                "concept": "आत्मन्_1"
+            },
+            {
+                "index": 3,
+                "concept": "समुद्र_1"
+            },
+            {
+                "index": 4,
+                "concept": "सरित्_1",
+                "properties": {
+                    "attr_num": "pl"
+                }
+            },
+            {
+                "index": 5,
+                "concept": "पति_1"
+            }
+        ],
+        "edges_dep": [
+            [
+                "08_080_1.1/दृश्_1",
+                "k2",
+                "08_080_1.2/आत्मन्_1"
+            ],
+            [
+                "08_080_1.1/दृश्_1",
+                "pk1",
+                "08_080_1.3/समुद्र_1"
+            ],
+            [
+                "08_080_1.5/पति_1",
+                "r6",
+                "08_080_1.4/सरित्_1"
+            ],
+            [
+                "08_080_1.3/समुद्र_1",
+                "mod",
+                "08_080_1.5/पति_1"
+            ]
+        ],
+        "edges_cxn": [],
+        "edges_discourse": []
+    },
+    {
+        "text": "(रामः) समुद्र-वचनात् च एव नलम् सेतुम् अकारयत् .",
+        "usr_id": "09_080_2",
+        "SENT_TYPE": "affirmative",
+        "nodes": [
+            {
+                "index": 1,
+                "concept": "राम",
+                "properties": {
+                    "attr_gen": "male"
+                }
+            },
+            {
+                "index": 2,
+                "concept": "समुद्र_1"
+            },
+            {
+                "index": 3,
+                "concept": "वचन_1"
+            },
+            {
+                "index": 4,
+                "concept": "[6-tat_1]"
+            },
+            {
+                "index": 5,
+                "concept": "नल",
+                "properties": {
+                    "attr_gen": "male"
+                }
+            },
+            {
+                "index": 6,
+                "concept": "सेतु_1"
+            },
+            {
+                "index": 7,
+                "concept": "कृ_1",
+                "properties": {
+                    "tam": "अत्_1",
+                    "is_combined_tam": true,
+                    "attr_causative": "causative",
+                    "is_root": true
+                }
+            },
+            {
+                "index": 8,
+                "concept": "[ne_1]",
+                "properties": {
+                    "attr_enamex": "per"
+                }
+            },
+            {
+                "index": 9,
+                "concept": "[ne_2]",
+                "properties": {
+                    "attr_enamex": "per"
+                }
+            }
+        ],
+        "edges_dep": [
+            [
+                "09_080_2.7/कृ_1",
+                "rh",
+                "09_080_2.4/[6-tat_1]"
+            ],
+            [
+                "09_080_2.7/कृ_1",
+                "k2",
+                "09_080_2.6/सेतु_1"
+            ],
+            [
+                "09_080_2.7/कृ_1",
+                "pk1",
+                "09_080_2.8/[ne_1]"
+            ],
+            [
+                "09_080_2.7/कृ_1",
+                "jk1",
+                "09_080_2.9/[ne_2]"
+            ]
+        ],
+        "edges_cxn": [
+            [
+                "09_080_2.8/[ne_1]",
+                "begin",
+                "09_080_2.1/राम"
+            ],
+            [
+                "09_080_2.4/[6-tat_1]",
+                "mod",
+                "09_080_2.2/समुद्र_1"
+            ],
+            [
+                "09_080_2.4/[6-tat_1]",
+                "head",
+                "09_080_2.3/वचन_1"
+            ],
+            [
+                "09_080_2.9/[ne_2]",
+                "begin",
+                "09_080_2.5/नल"
+            ]
+        ],
+        "edges_discourse": []
+    }
+]
