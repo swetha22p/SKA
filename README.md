@@ -1,130 +1,243 @@
 # SanskritUSR-NLG: Natural Language Generation from Sanskrit USR
 
-This repository contains scripts to generate
-natural language paragraphs (English and Hindi) from Sanskrit USR (Universal Semantic
-Representation) inputs, with an intermediate JSON conversion step.
+This repository contains scripts for generating natural language paragraphs from Sanskrit **USR (Universal Semantic Representation)** inputs using two approaches:
+
+1. **USR → Paragraph NLG**
+2. **USR → JSON → Paragraph NLG**
+
+The project allows comparison of paragraph generation using the original USR representation versus the converted JSON representation.
 
 ---
 
-## Repository Structure
+# Repository Structure
 
-```
+```text
 SKA/
+│
 ├── InputDataSanskrit/
-│   ├── JSON/                  ← Converted JSON files (intermediate format)
-│   └── USR/                   ← Raw Sanskrit USR input files (.txt or .usr)
+│   │
+│   ├── USR/
+│   │   └── Raw Sanskrit USR input files
+│   │
+│   ├── JSON/
+│   │   └── JSON files converted from USR
+│   │
+│   └── usr_error_logs/
+│       └── USR formatting and conversion error logs
+│
 ├── SanskritGeneratedOutputs/
-│   └── GeminiFlash2-5/        ← Generated paragraph outputs
+│   │
+│   ├── Gemini-2.5-Flash_USR/
+│   │   └── Paragraphs generated directly from USR input
+│   │
+│   └── Gemini-2.5-Flash_JSON/
+│       └── Paragraphs generated from JSON input
+│
 ├── Scripts/
-│   ├── json_formatter.py                      ← Converts USR → JSON
-│   └── sanskrit_json_paragraph_nlg_inference.py  ← NLG from JSON input (Gemini API)
+│   │
+│   ├── json_formatter.py
+│   │   └── Converts Sanskrit USR → JSON
+│   │
+│   ├── sanskrit_usr_paragraph_nlg_inference.py
+│   │   └── Generates paragraphs directly from USR
+│   │
+│   └── sanskrit_json_paragraph_nlg_inference.py
+│       └── Generates paragraphs from JSON
+│
+├── requirements.txt
+│
 └── README.md
 ```
 
 ---
 
-## Pipeline Overview
+# Pipeline Overview
 
-There are **two workflows** depending on your input format:
+There are two workflows in this project.
 
+## Workflow 1: Direct USR → Paragraph Generation
+
+```text
+Sanskrit USR Input
+        │
+        ▼
+sanskrit_usr_paragraph_nlg_inference.py
+        │
+        ▼
+Gemini 2.5 Flash
+        │
+        ▼
+Generated English Paragraph
 ```
-┌─────────────────────────────────────────────────────────┐
-│  Input: USR file (.txt)                          │
-│                                                         │
-│  Option A (USR → JSON → NLG):                           │
-│    USR  ──[json_formatter.py]──►  JSON                  │
-│                                     │                   │
-│                    [sanskrit_json_nlg.py]                │
-│                                     │                   │
-│                                     ▼                   │
-│                           Generated Paragraph           │
-│                                                         │
-│  (Use Option A - convert USR → JSON first, then run the JSON NLG script) │
-└─────────────────────────────────────────────────────────┘
+
+Output location:
+
+```text
+SanskritGeneratedOutputs/Gemini-2.5-Flash_USR/
 ```
 
+---
 
+## Workflow 2: USR → JSON → Paragraph Generation
 
-## API Key Setup
+```text
+Sanskrit USR Input
+        │
+        ▼
+json_formatter.py
+        │
+        ▼
+JSON Representation
+        │
+        ▼
+sanskrit_json_paragraph_nlg_inference.py
+        │
+        ▼
+Gemini 2.5 Flash
+        │
+        ▼
+Generated English Paragraph
+```
 
-Both NLG scripts use the **Google Gemini API**. You must set your API key before
-running either script.
+Output location:
 
-### Step 1 — Get a Gemini API Key
+```text
+SanskritGeneratedOutputs/Gemini-2.5-Flash_JSON/
+```
 
-Visit [https://aistudio.google.com/app/apikey](https://aistudio.google.com/app/apikey)
-and generate a key.
-### Step 2 — Where to put the API key (recommended)
+---
 
-Prefer keeping the key outside source files. The scripts in `Scripts/` read the
-key from the `GEMINI_API_KEY` environment variable. Set it in your shell before
-running the scripts:
+# Complete Experimental Pipeline
+
+```text
+                         Sanskrit USR
+                              │
+                 ┌────────────┴────────────┐
+                 │                         │
+                 ▼                         ▼
+        Direct USR Input              JSON Formatter
+                 │                         │
+                 ▼                         ▼
+          Gemini 2.5 Flash            JSON Input
+                 │                         │
+                 │                         ▼
+                 │                  Gemini 2.5 Flash
+                 │                         │
+                 ▼                         ▼
+     Gemini-2.5-Flash_USR       Gemini-2.5-Flash_JSON
+```
+
+This structure makes it easy to compare:
+
+```text
+USR representation  vs  JSON representation
+```
+
+using the same Gemini model.
+
+---
+
+# API Key Setup
+
+The NLG scripts use the Google Gemini API.
+
+You must set your Gemini API key before running the scripts.
+
+## Step 1: Get a Gemini API Key
+
+Get an API key from Google AI Studio.
+
+## Step 2: Set the API Key
+
+### Temporary for the current terminal session
 
 ```bash
-# temporary for current session
-export GEMINI_API_KEY="your-real-gemini-key-here"
+export GEMINI_API_KEY="your-gemini-api-key"
+```
 
-# make it persistent (zsh)
-echo 'export GEMINI_API_KEY="your-real-gemini-key-here"' >> ~/.zshrc
+### Persistent setup for macOS using zsh
+
+```bash
+echo 'export GEMINI_API_KEY="your-gemini-api-key"' >> ~/.zshrc
+```
+
+Then reload the configuration:
+
+```bash
 source ~/.zshrc
 ```
 
-Optional environment variables the scripts accept:
-
-- `GEMINI_MODEL`: model name to use (default: `gemini-2.5-flash`) — example:
+Check whether the API key is available:
 
 ```bash
-export GEMINI_MODEL="gemini-2.5-pro"
+echo $GEMINI_API_KEY
 ```
 
-- `BATCH_CHAR_LIMIT`: set the character limit used when batching large prompts
-(default: `30000`):
-
-```bash
-export BATCH_CHAR_LIMIT=60000
-```
-
-Alternative ways to provide the key (choose one you prefer):
-
-- Use a `.env` file and a loader (e.g., `python-dotenv`) in your scripts.
-- Use a secrets manager or system-level environment variable provisioning.
-
-Security note: never commit API keys to Git. Add files like `.env` to
-`.gitignore` and use restricted keys where possible.
-
-If you still prefer an inline assignment (not recommended), replace the
-placeholder at the top of the script with your key, but be careful not to
-commit it.
-
-```python
-# Not recommended for VCS: only for quick local testing
-API_KEY = "your-real-gemini-key-here"
-```
 ---
 
-## Input Format
+# Optional Environment Variables
 
-### USR Format (`.txt` or `.usr`)
+## Gemini Model
 
-Each sentence is enclosed in `<sent_id=...>` or `<segment_id=...>` tags.
-Lines beginning with `#` contain the original Sanskrit sentence.
-Lines beginning with `%` contain the sentence type (e.g., `%affirmative`).
-All other non-tag lines are token rows with exactly 9 tab/space-separated columns.
+You can optionally specify the Gemini model:
 
+```bash
+export GEMINI_MODEL="gemini-2.5-flash"
 ```
+
+## Batch Character Limit
+
+You can specify the batch character limit:
+
+```bash
+export BATCH_CHAR_LIMIT=25000
+```
+
+Recommended default:
+
+```text
+25000 characters
+```
+
+This leaves additional room for prompt instructions and formatting.
+
+---
+
+# Input Format
+
+## Sanskrit USR Format
+
+The input files contain Sanskrit USR structures.
+
+Example:
+
+```text
 <sent_id=SKA_001>
+
 # रामः वनं गच्छति
+
 % affirmative
+
 rAma_1   1   male/per   sg   0:main   -   -   -   -
+
 vana_1   2   place      sg   1:k2     -   -   -   -
+
 gam-wA   3   -          sg   0:main   -   -   -   -
+
 </sent_id>
 ```
 
-### JSON Format (`.json`)
+---
 
-Produced by `json_formatter.py` from the USR files above. Each JSON file is an
-array of sentence graph objects:
+# JSON Format
+
+The JSON files are generated from the USR files using:
+
+```text
+json_formatter.py
+```
+
+Example JSON structure:
 
 ```json
 [
@@ -132,14 +245,33 @@ array of sentence graph objects:
     "text": "रामः वनं गच्छति",
     "usr_id": "SKA_001",
     "SENT_TYPE": "affirmative",
+
     "nodes": [
-      { "index": 1, "concept": "राम_1", "properties": { "attr_gen": "male" } },
-      { "index": 2, "concept": "वन_1" },
-      { "index": 3, "concept": "गम्_1" }
+      {
+        "index": 1,
+        "concept": "राम_1",
+        "properties": {
+          "attr_gen": "male"
+        }
+      },
+      {
+        "index": 2,
+        "concept": "वन_1"
+      },
+      {
+        "index": 3,
+        "concept": "गम्_1"
+      }
     ],
+
     "edges_dep": [
-      ["SKA_001.1/राम_1", "k2", "SKA_001.2/वन_1"]
+      [
+        "SKA_001.1/राम_1",
+        "k2",
+        "SKA_001.2/वन_1"
+      ]
     ],
+
     "edges_cxn": [],
     "edges_discourse": []
   }
@@ -148,174 +280,292 @@ array of sentence graph objects:
 
 ---
 
-## Usage
+# Usage
 
-### Option A — USR Input via JSON (Two-Step Pipeline)
+# Workflow 1: USR → Paragraph
 
-#### Step 1: Convert USR to JSON
+This workflow generates paragraphs directly from Sanskrit USR files.
 
-```bash
-python Scripts/json_formatter.py --input-folder InputDataSanskrit/USR --output-folder InputDataSanskrit/JSON --log-folder InputDataSanskrit/usr_error_logs
-```
-
-Configure input/output paths inside the script (bottom of file):
-
-```python
-input_folder  = "InputDataSanskrit/USR"
-output_folder = "InputDataSanskrit/JSON"
-log_folder    = "InputDataSanskrit/usr_error_logs"
-```
-
-This will:
-- Parse all `.txt` files in `input_folder`
-- Write one `.json` file per input file to `output_folder`
-- Log any malformed or skipped USR blocks to `log_folder`
-
-#### Step 2: Generate Paragraphs from JSON
-
-Run the JSON→paragraph script (zero-shot only):
+## Command
 
 ```bash
-# ensure API key is set first
-export GEMINI_API_KEY="your-real-gemini-key-here"
-
-python3 Scripts/sanskrit_json_paragraph_nlg_inference.py InputDataSanskrit/JSON \
-  -o SanskritGeneratedOutputs/GeminiFlash2-5 \
-  -l english
+python3 Scripts/sanskrit_usr_paragraph_nlg_inference.py \
+  InputDataSanskrit/USR \
+  -o SanskritGeneratedOutputs/Gemini-2.5-Flash_USR \
+  -m gemini-2.5-flash
 ```
 
-CLI summary:
+### Input
 
-| Argument | Description | Required / Default |
-|---|---|---|
-| `json_folder` | Folder containing `.json` input files | required |
-| `-o / --output_folder` | Folder to save output `.txt` files | default: `./output` |
-| `-l / --language` | Target language: `english` or `hindi` | default: `english` |
-
-The script processes all `.json` files in the provided folder and writes
-one `.txt` paragraph output per input file.
-
----
-
-Supported Gemini models (set `GEMINI_MODEL` env to override):
-
-| Model | Notes |
-|---|---|
-| `gemini-2.5-flash` | Fast, recommended default |
-| `gemini-2.5-pro` | Higher quality, slower |
-| `gemini-2.0-flash` | Stable previous generation |
-| `gemini-1.5-flash` | Lightweight option |
-| `gemini-1.5-pro` | High quality previous generation |
-
----
-
-## Output Format
-
-Each output file is a plain `.txt` file containing a single generated paragraph,
-word-wrapped at 80 characters. Output filenames follow this convention:
-
-| Script | Output filename pattern |
-|---|---|
-| `sanskrit_json_paragraph_nlg_inference.py` | `<input_stem>_gemini_english_json.txt` |
-
-**Example output (`english`):**
-```
-Rama goes to the forest. The sages of the hermitage welcome him with offerings.
-Sita and Lakshmana follow him faithfully on the path through the dense woodland.
+```text
+InputDataSanskrit/USR/
 ```
 
-**Example output (`hindi`):**
-```
-राम वन को जाते हैं। आश्रम के ऋषि उन्हें भेंट देकर स्वागत करते हैं।
-सीता और लक्ष्मण घने वन के मार्ग पर उनका अनुसरण करते हैं।
+### Output
+
+```text
+SanskritGeneratedOutputs/Gemini-2.5-Flash_USR/
 ```
 
 ---
 
-## Error Logs
+# Workflow 2: USR → JSON → Paragraph
 
-When running `json_formatter.py`, malformed or skipped USR blocks are logged per
-input file under the configured `log_folder`. Each log file is named
-`error-<input_stem>.txt` and contains lines of the form:
-
-```
-SKA_023 - Incorrect number of columns: 8 (expected 9)
-SKA_047 - Missing sent_type
-SKA_112 - Duplicate usr_id: SKA_112
-```
-
-If no errors are found for a file, no log file is created and the console
-prints: `No errors for <filename>`.
+This workflow contains two steps.
 
 ---
 
-## Rate Limiting and Batching
+## Step 1: Convert USR to JSON
 
-To avoid hitting Gemini service limits and to keep prompts within safe input
-sizes the scripts use two protections:
-
-- **Request rate limit:** at most 15 API calls per minute (configurable in
-  code if you need to change it). When reached the script waits before
-  continuing.
-- **Batch character limit:** by default `BATCH_CHAR_LIMIT=30000` characters.
-
-Why 30,000 characters? Briefly:
-
-- Gemini models enforce an input size limit measured in tokens. Prompts and
-  JSON payloads are counted toward this limit. 30,000 characters is a
-  conservative, character-level proxy that keeps most prompts safely below
-  typical token limits while leaving room for the script's instruction text
-  and model metadata.
-- It is intentionally conservative to avoid unexpected `413`/`429` errors
-  caused by oversize requests. If you have measured average prompt size and
-  want to increase the limit, set `BATCH_CHAR_LIMIT` (environment) higher.
-
-Example override:
+Run:
 
 ```bash
-export BATCH_CHAR_LIMIT=60000
+python3 Scripts/json_formatter.py \
+  -i InputDataSanskrit/USR \
+  -o InputDataSanskrit/JSON \
+  -l InputDataSanskrit/usr_error_logs
 ```
 
-Note: a more precise approach is to compute token counts (e.g., using a
-tokenizer matching the model) and batch by tokens instead of characters. Ask
-me to add token-aware batching if you'd like that improvement.
+### Input
+
+```text
+InputDataSanskrit/USR/
+```
+
+### JSON Output
+
+```text
+InputDataSanskrit/JSON/
+```
+
+### Error Logs
+
+```text
+InputDataSanskrit/usr_error_logs/
+```
 
 ---
 
-## Dependencies
+## Step 2: Generate Paragraphs from JSON
 
-Install Python dependencies with:
+Run:
+
+```bash
+python3 Scripts/sanskrit_json_paragraph_nlg_inference.py \
+  InputDataSanskrit/JSON \
+  -o SanskritGeneratedOutputs/Gemini-2.5-Flash_JSON
+```
+
+### Input
+
+```text
+InputDataSanskrit/JSON/
+```
+
+### Output
+
+```text
+SanskritGeneratedOutputs/Gemini-2.5-Flash_JSON/
+```
+
+---
+
+# Final Output Naming Convention
+
+The recommended naming convention is:
+
+```text
+SanskritGeneratedOutputs/
+│
+├── Gemini-2.5-Flash_USR/
+│
+└── Gemini-2.5-Flash_JSON/
+```
+
+This clearly identifies:
+
+| Output Folder           | Input Representation | Model            |
+| ----------------------- | -------------------- | ---------------- |
+| `Gemini-2.5-Flash_USR`  | Direct Sanskrit USR  | Gemini 2.5 Flash |
+| `Gemini-2.5-Flash_JSON` | Converted JSON       | Gemini 2.5 Flash |
+
+---
+
+# Output Format
+
+Each generated output is saved as a `.txt` file.
+
+Example:
+
+```text
+Rama goes to the forest. The sages of the hermitage welcome him with
+offerings. Sita and Lakshmana follow him faithfully on the path through
+the dense woodland.
+```
+
+---
+
+# Error Logs
+
+During USR → JSON conversion, malformed or invalid USR structures are written to:
+
+```text
+InputDataSanskrit/usr_error_logs/
+```
+
+Example errors:
+
+```text
+SKA_023 - Incorrect number of columns
+
+SKA_047 - Missing sentence type
+
+SKA_112 - Duplicate usr_id
+```
+
+If no errors are found, no error log file is created for that input file.
+
+---
+
+# Rate Limiting and Batching
+
+The Gemini scripts use batching and rate limiting to avoid excessive API requests.
+
+## Request Rate Limit
+
+The scripts limit the number of API requests per minute.
+
+Example configuration:
+
+```text
+Maximum requests per minute: 15
+```
+
+When the limit is reached, the script waits before continuing.
+
+---
+
+## Batch Character Limit
+
+Large inputs are divided into batches.
+
+Recommended default:
+
+```text
+BATCH_CHAR_LIMIT = 25000
+```
+
+You can override it using:
+
+```bash
+export BATCH_CHAR_LIMIT=25000
+```
+
+The batch size should account for:
+
+* JSON or USR input content
+* Prompt instructions
+* Structure identifiers
+* Formatting characters
+
+For this reason, a limit of approximately **25,000 characters** is safer than simply counting raw input content up to the maximum.
+
+---
+
+# Dependencies
+
+Install the required Python packages:
 
 ```bash
 pip install google-generativeai wxconv
 ```
 
-| Package | Used by | Purpose |
-|---|---|---|
-| `google-generativeai` | `sanskrit_json_paragraph_nlg_inference.py` | Gemini API access |
-| `wxconv` | `json_formatter.py` | WX → UTF-8 transliteration for Hindi concepts |
+The main dependencies are:
 
-Python 3.8 or higher is recommended.
+| Package               | Purpose                       |
+| --------------------- | ----------------------------- |
+| `google-generativeai` | Gemini API access             |
+| `wxconv`              | WX transliteration/conversion |
+
+> Note: The `google-generativeai` package may display a deprecation warning. The scripts can later be migrated to the newer `google.genai` package.
 
 ---
 
-## Setup: Virtual environment and requirements
+# Virtual Environment Setup
 
-Create and activate a Python virtual environment, then install pinned dependencies from `requirements.txt`:
+## Create a virtual environment
 
 ```bash
-# create venv (uses python3 on macOS)
-python3 -m venv .venv
+python3 -m venv venv
+```
 
-# activate the venv (macOS / Linux)
-source .venv/bin/activate
+## Activate it on macOS/Linux
 
-# install dependencies
+```bash
+source venv/bin/activate
+```
+
+## Install dependencies
+
+```bash
 pip install -r requirements.txt
 ```
 
-To deactivate the virtual environment run `deactivate`.
+## Run the scripts
+
+After activation:
+
+```bash
+python3 Scripts/json_formatter.py \
+  -i InputDataSanskrit/USR \
+  -o InputDataSanskrit/JSON \
+  -l InputDataSanskrit/usr_error_logs
+```
+
+Then:
+
+```bash
+python3 Scripts/sanskrit_json_paragraph_nlg_inference.py \
+  InputDataSanskrit/JSON \
+  -o SanskritGeneratedOutputs/Gemini-2.5-Flash_JSON
+```
+
+Or run the direct USR pipeline:
+
+```bash
+python3 Scripts/sanskrit_usr_paragraph_nlg_inference.py \
+  InputDataSanskrit/USR \
+  -o SanskritGeneratedOutputs/Gemini-2.5-Flash_USR \
+  -m gemini-2.5-flash
+```
 
 ---
 
+# Summary
 
+The project supports two experimental approaches:
+
+```text
+Approach 1:
+
+USR
+ ↓
+Gemini 2.5 Flash
+ ↓
+Generated Paragraph
+
+
+Approach 2:
+
+USR
+ ↓
+JSON Formatter
+ ↓
+JSON
+ ↓
+Gemini 2.5 Flash
+ ↓
+Generated Paragraph
+```
+
+The outputs can then be compared to evaluate whether **direct USR input** or **JSON-based semantic representation** produces better natural language generation results.

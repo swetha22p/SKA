@@ -1,9 +1,6 @@
 #!/usr/bin/env python3
 """
 Sanskrit-JSON-Paragraph-NLG (Sanskrit JSON Graph Paragraph Natural Language Generation)
-Inference script for generating complete paragraphs from Sanskrit JSON graph data.
-25-Feb-2026: Prompts edited by Pratibha Rani to make them source language agnostic by removing
-word "Sanskrit" from the English and Hindi prompts by replacing with words "input" and "language".
 """
 
 import os
@@ -60,31 +57,6 @@ LANGUAGE_PROMPTS = {
         "- DO NOT add ANY words, concepts, or ideas that are not in the input JSON semantic tokens\n"
         "- Understand input language semantic roles and translate them appropriately to English "
         "Example: Combine multiple input JSON graph structures into one flowing paragraph in the exact order provided with seamless transitions."
-    ),
-    "hindi": (
-        "आप एक इनपुट JSON से हिंदी वाक्य जनरेटर हैं। आपको इनपुट JSON सेमेंटिक डेटा से हिंदी वाक्य बनाने हैं। "
-        "इनपुट JSON डेटा में वाक्यों की सेमेंटिक जानकारी है जैसे शब्द, क्रिया, विशेषण, संबंध आदि। "
-        "आपको इस सेमेंटिक जानकारी से हिंदी वाक्य बनाने हैं। "
-        "महत्वपूर्ण नियम - केवल इनपुट JSON सामग्री से चिपके रहें: "
-        "- इनपुट JSON सेमेंटिक डेटा को पढ़कर हिंदी वाक्य बनाएं "
-        "- इनपुट JSON में भाषा धातु, प्रत्यय, विभक्ति के साथ सेमेंटिक टोकन और उनके संबंध (k1, k7, r6, आदि) हैं\n"
-        "- इन भाषा सेमेंटिक टोकन और उनके संबंधों से अर्थ निकालें\n"
-        "- भाषा व्याकरण की अवधारणाओं को समझें जैसे विभक्ति, धातु, प्रत्यय "
-        "- शब्दों, क्रियाओं, विशेषणों को सही तरीके से जोड़ें "
-        "- व्याकरण के नियमों का पालन करें "
-        "- सभी वाक्यों को क्रमानुसार जोड़कर पैराग्राफ बनाएं "
-        "- उचित संयोजक और प्रवाह बनाए रखें "
-        "- JSON नोटेशन न दें, सिर्फ हिंदी वाक्य दें "
-        "- कड़ाई से इनपुट JSON डेटा से सटीक अर्थ बनाए रखें - कोई जोड़ या घटाव नहीं "
-        "- इनपुट JSON डेटा में नहीं है वैसी कोई जानकारी न जोड़ें "
-        "- इनपुट JSON डेटा में है वैसी कोई जानकारी न हटाएं "
-        "- नए विचार, वस्तु या अवधारणाएं न बनाएं जो इनपुट JSON में नहीं हैं "
-        "- उदाहरण, सादृश्य या स्पष्टीकरण न जोड़ें जो इनपुट JSON में नहीं हैं "
-        "- केवल वही उत्पन्न करें जो इनपुट JSON डेटा में स्पष्ट रूप से मौजूद है "
-        "- यदि इनपुट JSON डेटा अस्पष्ट है, तो स्पष्ट रूप से मौजूद चीज़ों से चिपके रहें "
-        "- केवल इनपुट JSON सामग्री - कोई कल्पना नहीं "
-        "- इनपुट भाषा सेमेंटिक भूमिकाओं को समझें और उन्हें हिंदी में उचित रूप से अनुवाद करें "
-        "उदाहरण: इनपुट JSON डेटा से 'हमारी बदलती पृथ्वी' जैसा वाक्य बनाएं।"
     )
 }
 
@@ -102,7 +74,7 @@ def wait_for_rate_limit():
             time.sleep(sleep_time)
         request_times.popleft()
 
-def call_gemini_api_batch(api_input_text, api_key=None, language="hindi", max_retries=3):
+def call_gemini_api_batch(api_input_text, api_key=None, language="english", max_retries=3):
     """Makes a single, batched call to the Gemini API with smart quota handling."""
     if genai is None:
         raise RuntimeError("google.generativeai not available")
@@ -190,9 +162,9 @@ def parse_json_file(file_path: str) -> List[Dict[str, Any]]:
     items.sort(key=lambda x: x['id'])
     return items
 
-def create_paragraph_prompt(language: str, items: List[Dict[str, Any]]) -> str:
-    """Create a prompt for paragraph generation from Sanskrit JSON."""
-    prompt = LANGUAGE_PROMPTS[language] + "\n\n"
+def create_paragraph_prompt(items: List[Dict[str, Any]]) -> str:
+    """Create a prompt for paragraph generation from Sanskrit JSON (English only)."""
+    prompt = LANGUAGE_PROMPTS["english"] + "\n\n"
     
     # Add target items with more specific instructions
     prompt += f"CRITICAL: Generate a complete paragraph from the following {len(items)} input JSON structures. "
@@ -205,15 +177,15 @@ def create_paragraph_prompt(language: str, items: List[Dict[str, Any]]) -> str:
     prompt += f"CRITICAL INSTRUCTIONS:\n"
     prompt += f"- Study the input JSON semantic data in each structure above\n"
     prompt += f"- Extract the meaning from the input semantic information (words, verbs, adjectives, relations)\n"
-    prompt += f"- Generate proper {language} sentences from the input semantic data\n"
+    prompt += f"- Generate proper English sentences from the input semantic data\n"
     prompt += f"- Follow the EXACT order of structures (1, 2, 3, ...)\n"
     prompt += f"- Combine all {len(items)} structures into one coherent paragraph\n"
     prompt += f"- Do NOT add any information not present in the input JSON structures\n"
     prompt += f"- Do NOT skip any structures\n"
     prompt += f"- Use appropriate connectors to make the paragraph flow naturally\n"
-    prompt += f"- IMPORTANT: Replace [masked] with the actual {language} sentence you generate from input JSON data\n"
+    prompt += f"- IMPORTANT: Replace [masked] with the actual English sentence you generate from input JSON data\n"
     prompt += f"- Do NOT output [masked] or any JSON notation in your response\n"
-    prompt += f"- Generate ONLY the final {language} paragraph\n"
+    prompt += f"- Generate ONLY the final English paragraph\n"
     prompt += f"- WORK DIRECTLY FROM THE INPUT JSON SEMANTIC STRUCTURE\n"
     prompt += f"- The Input JSON contains language semantic tokens with roots, suffixes, and grammatical relations\n"
     prompt += f"- Extract meaning from these language semantic tokens and their relations (k1, k7, r6, rblsk, etc.)\n"
@@ -231,8 +203,8 @@ def wrap_text(text: str, width: int = 80) -> str:
     import textwrap
     return textwrap.fill(text, width=width, break_long_words=False, break_on_hyphens=False)
 
-def process_file(input_file: str, output_file: str, language: str) -> None:
-    """Process Sanskrit JSON file and generate paragraph output in safe batches."""
+def process_file(input_file: str, output_file: str) -> None:
+    """Process Sanskrit JSON file and generate paragraph output in safe batches (English-only)."""
     print(f"Processing {input_file} for paragraph generation...")
 
     # Parse input file
@@ -256,8 +228,8 @@ def process_file(input_file: str, output_file: str, language: str) -> None:
         if batch_char_count + len(item_str) > BATCH_CHAR_LIMIT:
             # Process current batch
             print(f"  - Processing batch {batch_id} with {len(current_batch)} structures...")
-            prompt = create_paragraph_prompt(language, current_batch)
-            response_text = call_gemini_api_batch(prompt, None, language)
+            prompt = create_paragraph_prompt(current_batch)
+            response_text = call_gemini_api_batch(prompt)
             paragraphs.append(response_text.strip() if response_text else "[NO RESPONSE]")
 
             # Sleep to respect quota
@@ -275,8 +247,8 @@ def process_file(input_file: str, output_file: str, language: str) -> None:
     # Process remaining batch
     if current_batch:
         print(f"  - Processing batch {batch_id} with {len(current_batch)} structures...")
-        prompt = create_paragraph_prompt(language, current_batch)
-        response_text = call_gemini_api_batch(prompt, None, language)
+        prompt = create_paragraph_prompt(current_batch)
+        response_text = call_gemini_api_batch(prompt)
         paragraphs.append(response_text.strip() if response_text else "[NO RESPONSE]")
 
     # Combine all partial paragraphs
@@ -299,9 +271,7 @@ def main():
     parser.add_argument("json_folder", help="Folder containing input Sanskrit JSON files (e.g., ./json)")
     parser.add_argument("-o", "--output_folder", default="output",
                        help="Folder where output paragraphs will be saved (default: ./output)")
-    parser.add_argument("-l", "--language", default="english",
-                       choices=["english", "hindi"],
-                       help="Target language (default: english)")
+    # Script generates English paragraphs only
     # Only zero-shot mode is supported
 
     args = parser.parse_args()
@@ -341,7 +311,7 @@ def main():
         print(f"   → Output: {output_path}")
 
         try:
-            process_file(input_path, output_path, args.language)
+            process_file(input_path, output_path)
             if os.path.exists(output_path):
                 print(f"✅ File created: {output_path}")
             else:
