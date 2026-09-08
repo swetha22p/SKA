@@ -30,14 +30,11 @@ SKA/
 │
 ├── Scripts/
 │   │
-│   ├── json_formatter.py
-│   │   └── Converts Sanskrit USR → JSON
+│   ├── json_formatter.py #Converts Sanskrit USR → JSON
 │   │
-│   ├── sanskrit_usr_paragraph_nlg_inference.py
-│   │   └── Generates paragraphs directly from USR
+│   ├── sanskrit_usr_paragraph_nlg_inference.py  #Generates paragraphs directly from USR
 │   │
-│   └── sanskrit_json_paragraph_nlg_inference.py
-│       └── Generates paragraphs from JSON
+│   └── sanskrit_json_paragraph_nlg_inference.py #Generates paragraphs from JSON
 │
 ├── requirements.txt
 │
