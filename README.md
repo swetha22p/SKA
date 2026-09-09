@@ -144,7 +144,7 @@ Get an API key from Google AI Studio.
 ### Temporary for the current terminal session
 
 ```bash
-export GEMINI_API_KEY=""
+export GEMINI_API_KEY="AIzaSyDJL_lY9MTfXeYR1XS-YxmSEWuODTC6i3I"
 ```
 
 ### Persistent setup for macOS using zsh
